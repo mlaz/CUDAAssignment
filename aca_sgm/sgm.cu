@@ -82,9 +82,10 @@ void usage(char *command);
 __global__ void d_determine_costs (int *left_image, int *right_image, int *costs,
                                   int nx, int ny, int disp_range)
 {
-  int x = blockIdx.x * blockDim.x + threadIdx.x;
+  int row_size = ceil((float) nx / blockDim.x);
+  int x = ((blockIdx.x % row_size) * blockDim.x) + threadIdx.x;
   int y = blockIdx.y;
-  int d = threadIdx.y;
+  int d = ((blockIdx.x / row_size) * blockDim.y) + threadIdx.y;
 
   if ( (y < ny) && (d < disp_range) && (x < nx))
     {
@@ -93,6 +94,14 @@ __global__ void d_determine_costs (int *left_image, int *right_image, int *costs
         COSTS(x,y,d) = abs( LEFT_IMAGE(x,y) - RIGHT_IMAGE(x-d,y) );
     }
 }
+
+/* WIP */
+// void evaluate_path(const int *prior, const int *local,
+//                    int path_intensity_gradient, int *curr_cost ,
+//                    const int nx, const int ny, const int disp_range)
+// {
+
+// }
 
 /* functions code */
 
@@ -373,7 +382,7 @@ void sgmDevice( const int *h_leftIm, const int *h_rightIm,
   int costs_size = image_size * disp_range;
 
   // Processing all costs. W*H*D. D= disp_range
-  int *costs = (int *) calloc(costs_size, sizeof(int));
+  int *costs = (int *) calloc(disp_range * nx * ny, sizeof(int));
   if (costs == NULL) {
     fprintf(stderr, "sgm_cuda:"
             " Failed memory allocation(s).\n");
@@ -394,10 +403,14 @@ void sgmDevice( const int *h_leftIm, const int *h_rightIm,
   cudaMemcpy(d_left_image, h_leftIm, image_size, cudaMemcpyHostToDevice);
   cudaMemcpy(d_right_image, h_rightIm, image_size, cudaMemcpyHostToDevice);
 
-  int block_x = 16;
-  int block_y = disp_range; // 32 * 16 = 512
+  int block_x = 32;
+  int block_y = (disp_range >= 16) ? 16 : disp_range; // 32 * 16 = 512
 
-  int grid_x = ceil((float) nx / block_x);
+  int z_blocks = (disp_range % block_y)
+    ? ceil((float) disp_range / block_y) + 1
+    : ceil((float) disp_range / block_y);
+
+  int grid_x = ceil((float) nx / block_x) * z_blocks;
   int grid_y = ny;
 
   dim3 block(block_x, block_y);
