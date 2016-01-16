@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <float.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #include <limits>
 #include <algorithm>
@@ -76,6 +77,8 @@ void sgmDevice( const int *h_leftIm, const int *h_rightIm,
                 const int w, const int h, const int disp_range );
 
 void usage(char *command);
+
+__device__ int d_find_min_index ( const int *v, const int disp_range );
 
 /* kernels */
 //display_range threads per block * grid( nx * ny )
@@ -173,6 +176,35 @@ __global__ void d_inplace_sum_views ( int * im1, const int * im2,
   int size = nx * ny * disp_range;
   if ( pos < size )
     im1[pos] += im2[pos];
+}
+
+__global__ void d_create_disparity_view ( int *accumulated_costs , int * disp_image,
+                                        int nx, int ny, int disp_range )
+{
+
+  // for ( int j = 0; j < ny; j++ ) {
+  //   for ( int i = 0; i < nx; i++ ) {
+  //     DISP_IMAGE(i,j) =
+  //       4 * find_min_index( &ACCUMULATED_COSTS(i,j,0), disp_range );
+  //   }
+  // }
+  int pos = (blockIdx.x * blockDim.x) + threadIdx.x;
+  int size = nx * ny ;
+  if ( pos < size )
+    disp_image[pos] = 4 * d_find_min_index(&accumulated_costs[pos * disp_range], disp_range);
+}
+
+__device__ int d_find_min_index ( const int *v, const int disp_range )
+{
+    int min = INT_MAX;
+    int minind = -1;
+    for (int d=0; d < disp_range; d++) {
+         if(v[d]<min) {
+              min = v[d];
+              minind = d;
+         }
+    }
+    return minind;
 }
 
 /* functions code */
@@ -494,12 +526,13 @@ void sgmDevice ( const int *h_leftIm, const int *h_rightIm,
   int ny = h;
   int image_size = nx * ny * sizeof(int); // size in bytes
   int costs_size = disp_range * image_size;
-  int costs_elems = disp_range * nx * ny;
+  int image_dim = nx * ny;
+  int costs_dim = disp_range * nx * ny;
 
   // cudaError error;
 
   // Processing all costs. W*H*D. D= disp_range
-  int *costs = (int *) calloc(costs_elems, sizeof(int));
+  int *costs = (int *) calloc(costs_dim, sizeof(int));
   if (costs == NULL) {
     fprintf(stderr, "sgm_cuda:"
             " Failed memory allocation(s).\n");
@@ -555,14 +588,14 @@ void sgmDevice ( const int *h_leftIm, const int *h_rightIm,
   int *d_dir_accumulated_costs;
   cudaMalloc((void **) &d_dir_accumulated_costs, costs_size);
 
-  if (costs_elems >= 512)
+  if (costs_dim >= 512)
     {
       block.x = 512;
-      grid.x = ceil((float) costs_elems/512);
+      grid.x = ceil((float) costs_dim/512);
     }
   else
     {                            //not likely to happen
-      block.x = costs_elems;
+      block.x = costs_dim;
       grid.x = 1;
     }
   grid.y = grid.z = 1;
@@ -620,14 +653,39 @@ void sgmDevice ( const int *h_leftIm, const int *h_rightIm,
   free(dir_accumulated_costs);
 
   // device memory mgmt
-  cudaFree(d_accumulated_costs);
+
   cudaFree(d_dir_accumulated_costs);
   cudaFree(d_left_image);
   cudaFree(d_right_image);
   cudaFree(d_costs);
 
-  create_disparity_view( accumulated_costs, h_dispIm, nx, ny, disp_range );
+  if (image_dim >= 512)
+    {
+      block.x = 512;
+      grid.x = ceil((float) image_dim/512);
+    }
+  else
+    {                            //not likely to happen
+      block.x = image_dim;
+      grid.x = 1;
+    }
 
+  grid.y = grid.z = 1;
+  block.y = block.z = 1;
+
+  int *d_disp_im;
+  cudaMalloc((void **) &d_disp_im, image_size);
+
+  //create_disparity_view( accumulated_costs, h_dispIm, nx, ny, disp_range );
+  cudaMemcpy(d_accumulated_costs, accumulated_costs, costs_size, cudaMemcpyHostToDevice);
+
+  d_create_disparity_view <<< grid, block >>> ( d_accumulated_costs, d_disp_im, nx, ny, disp_range );
+
+  fflush(stdout);
+  cudaMemcpy(h_dispIm, d_disp_im, image_size, cudaMemcpyDeviceToHost);
+
+  cudaFree(d_disp_im);
+  cudaFree(d_accumulated_costs);
   free(accumulated_costs);
 }
 
