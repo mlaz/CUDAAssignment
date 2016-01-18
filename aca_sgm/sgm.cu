@@ -442,59 +442,83 @@ void iterate_direction_diryneg ( const int diry, const int *left_image,
  *d_iterate_direction: computes iterate_direction_dirxpos() using the
  *the GPU
  */
-void d_iterate_direction ( dim3 block, dim3 grid, int* d_costs,
+void d_iterate_direction ( int* d_costs,
                            const int *d_left_image, int *d_accumulated_costs,
                            const int dirx, const int diry, const int *left_image,
                            const int* costs, int *accumulated_costs,
                            const int nx, const int ny, const int disp_range )
 {
-    // Walk along the edges in a clockwise fashion
-    if ( dirx > 0 ) {
-      // LEFT MOST EDGE
-      // Process every pixel along this edge
-      //iterate_direction_dirxpos(dirx,left_image,costs,accumulated_costs, nx,
-      // ny, disp_range);
-      cudaMemcpy(d_accumulated_costs, accumulated_costs, nx*ny*disp_range*sizeof(int), cudaMemcpyHostToDevice);
-      d_iterate_direction_dirxpos <<< grid, block >>> ( dirx, d_left_image,
+  dim3 block1d(1);
+  dim3 grid1d(1);
+
+  // Walk along the edges in a clockwise fashion
+  if ( dirx > 0 ) {
+    // LEFT MOST EDGE
+    // Process every pixel along this edge
+    //iterate_direction_dirxpos(dirx,left_image,costs,accumulated_costs, nx,
+    // ny, disp_range);
+    block1d.z = disp_range;
+    grid1d.y = ny;
+    cudaMemcpy(d_accumulated_costs, accumulated_costs, nx*ny*disp_range*sizeof(int), cudaMemcpyHostToDevice);
+    d_iterate_direction_dirxpos <<< grid1d, block1d >>> ( dirx, d_left_image,
                                                       d_costs, d_accumulated_costs,
                                                       nx, ny, disp_range );
-      cudaMemcpy(accumulated_costs, d_accumulated_costs, nx*ny*disp_range*sizeof(int), cudaMemcpyDeviceToHost);
-    }
-    else if ( diry > 0 ) {
-      // TOP MOST EDGE
-      // Process every pixel along this edge only if dirx ==
-      // 0. Otherwise skip the top left most pixel
-      // iterate_direction_dirypos(diry,left_image,costs,accumulated_costs,
-      // nx, ny, disp_range);
-      cudaMemcpy(d_accumulated_costs, accumulated_costs, nx*ny*disp_range*sizeof(int), cudaMemcpyHostToDevice);
-      d_iterate_direction_dirypos <<< grid, block >>> ( dirx, d_left_image,
+    cudaMemcpy(accumulated_costs, d_accumulated_costs,
+               nx*ny*disp_range*sizeof(int), cudaMemcpyDeviceToHost);
+
+  }
+  else if ( diry > 0 ) {
+    // TOP MOST EDGE
+    // Process every pixel along this edge only if dirx ==
+    // 0. Otherwise skip the top left most pixel
+    // iterate_direction_dirypos(diry,left_image,costs,accumulated_costs, nx,
+    // ny, disp_range);
+    block1d.z = disp_range;
+    grid1d.y = nx;
+    cudaMemcpy(d_accumulated_costs, accumulated_costs, nx*ny*disp_range*sizeof(int), cudaMemcpyHostToDevice);
+    d_iterate_direction_dirypos <<< grid1d, block1d >>> ( diry, d_left_image,
                                                       d_costs, d_accumulated_costs,
                                                       nx, ny, disp_range );
-      cudaMemcpy(accumulated_costs, d_accumulated_costs, nx*ny*disp_range*sizeof(int), cudaMemcpyDeviceToHost);
-    }
-    else if ( dirx < 0 ) {
-      // RIGHT MOST EDGE
-      // Process every pixel along this edge only if diry ==
-      // 0. Otherwise skip the top right most pixel
-      // iterate_direction_dirxneg(dirx,left_image,costs,accumulated_costs, nx, ny, disp_range);
-      cudaMemcpy(d_accumulated_costs, accumulated_costs, nx*ny*disp_range*sizeof(int), cudaMemcpyHostToDevice);
-      d_iterate_direction_dirxneg <<< grid, block >>> ( dirx, d_left_image,
-                                                      d_costs, d_accumulated_costs,
-                                                      nx, ny, disp_range );
-      cudaMemcpy(accumulated_costs, d_accumulated_costs, nx*ny*disp_range*sizeof(int), cudaMemcpyDeviceToHost);
-    }
-    else if ( diry < 0 ) {
-      // BOTTOM MOST EDGE
-      // Process every pixel along this edge only if dirx ==
-      // 0. Otherwise skip the bottom left and bottom right pixel
-      // iterate_direction_diryneg(diry,left_image,costs,accumulated_costs,
-      // nx, ny, disp_range);
-      cudaMemcpy(d_accumulated_costs, accumulated_costs, nx*ny*disp_range*sizeof(int), cudaMemcpyHostToDevice);
-      d_iterate_direction_diryneg <<< grid, block >>> ( dirx, d_left_image,
-                                                      d_costs, d_accumulated_costs,
-                                                      nx, ny, disp_range );
-      cudaMemcpy(accumulated_costs, d_accumulated_costs, nx*ny*disp_range*sizeof(int), cudaMemcpyDeviceToHost);
-    }
+    cudaMemcpy(accumulated_costs, d_accumulated_costs,
+               nx*ny*disp_range*sizeof(int), cudaMemcpyDeviceToHost);
+
+  }
+  else if ( dirx < 0 ) {
+    // RIGHT MOST EDGE
+    // Process every pixel along this edge only if diry ==
+    // 0. Otherwise skip the top right most pixel
+    //iterate_direction_dirxneg(dirx,left_image,costs,accumulated_costs, nx, ny, disp_range);
+
+    block1d.z = disp_range;
+    grid1d.y = ny;
+    cudaMemcpy(d_accumulated_costs, accumulated_costs,
+               nx*ny*disp_range*sizeof(int), cudaMemcpyHostToDevice);
+    d_iterate_direction_dirxneg <<< grid1d, block1d >>> ( dirx, d_left_image,
+                                                    d_costs, d_accumulated_costs,
+                                                    nx, ny, disp_range );
+    cudaMemcpy(accumulated_costs, d_accumulated_costs,
+               nx*ny*disp_range*sizeof(int), cudaMemcpyDeviceToHost);
+
+  }
+  else if ( diry < 0 ) {
+    // BOTTOM MOST EDGE
+    // Process every pixel along this edge only if dirx ==
+    // 0. Otherwise skip the bottom left and bottom right pixel
+    //iterate_direction_diryneg(diry,left_image,costs,accumulated_costs, nx, ny, disp_range);
+
+    block1d.z = disp_range;
+    grid1d.y = nx;
+    cudaMemcpy(d_accumulated_costs, accumulated_costs,
+    nx*ny*disp_range*sizeof(int), cudaMemcpyHostToDevice);
+
+    d_iterate_direction_diryneg <<< grid1d, block1d >>> ( diry, d_left_image,
+                                                    d_costs, d_accumulated_costs,
+                                                    nx, ny, disp_range );
+    cudaMemcpy(accumulated_costs, d_accumulated_costs,
+                                                    nx*ny*disp_range*sizeof(int),
+                                                    cudaMemcpyDeviceToHost);
+
+  }
 }
 
 void iterate_direction ( const int dirx, const int diry, const int *left_image,
@@ -740,11 +764,11 @@ void sgmDevice ( const int *h_leftIm, const int *h_rightIm,
     }
 
   //geometry for d_iterate_direction kernels
-  dim3 block1d_dir(1);
-  dim3 grid1d_dir(1);
+  // dim3 block1d_dir(1);
+  // dim3 grid1d_dir(1);
 
-  block1d_dir.z = disp_range;
-  grid1d_dir.y = ny;
+  // block1d_dir.z = disp_range;
+  // grid1d_dir.y = ny;
 
 
   int dirx=0,diry=0;
@@ -757,7 +781,7 @@ void sgmDevice ( const int *h_leftIm, const int *h_rightIm,
     //                     nx, ny, disp_range );
 
     //cudaMemset( d_dir_accumulated_costs, 0, costs_size);     ////////delete this
-    d_iterate_direction ( block1d_dir, grid1d_dir, d_costs,
+    d_iterate_direction ( d_costs,
                           d_left_image, d_dir_accumulated_costs,
                           dirx, diry, h_leftIm,
                           costs, dir_accumulated_costs,
@@ -781,7 +805,15 @@ void sgmDevice ( const int *h_leftIm, const int *h_rightIm,
   for(diry=-1; diry<2; diry++) {
     if(dirx==0 && diry==0) continue;
     std::fill(dir_accumulated_costs, dir_accumulated_costs+nx*ny*disp_range, 0);
-    iterate_direction( dirx,diry, h_leftIm, costs, dir_accumulated_costs, nx, ny, disp_range);
+    // iterate_direction( dirx,diry, h_leftIm, costs, dir_accumulated_costs, nx, ny, disp_range);
+
+
+    d_iterate_direction ( d_costs,
+                          d_left_image, d_dir_accumulated_costs,
+                          dirx, diry, h_leftIm,
+                          costs, dir_accumulated_costs,
+                          nx, ny, disp_range );
+
 
     inplace_sum_views( accumulated_costs, dir_accumulated_costs, nx, ny,
     disp_range);
