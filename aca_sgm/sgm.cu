@@ -214,6 +214,47 @@ __global__ void d_iterate_direction_dirxneg ( const int dirx, const int *left_im
     //   }
 }
 
+__global__ void d_iterate_direction_diryneg ( const int diry, const int *left_image,
+                                 int* costs, int *accumulated_costs,
+                                 const int nx, const int ny, const int disp_range )
+{
+  int x = blockIdx.y;
+  int y = ny-1;
+  int d = threadIdx.z;
+
+  if ( (x < nx) && (d < disp_range) )
+    {
+      ACCUMULATED_COSTS(x,ny-1,d) += COSTS(x,ny-1,d);;
+      __syncthreads();
+      for (y = ny-2; y >= 0; y--)
+        {
+          d_evaluate_path( &ACCUMULATED_COSTS(x,y-diry,0),
+                           &COSTS(x,y,0),
+                           abs(LEFT_IMAGE(x,y)-LEFT_IMAGE(x,y-diry)) ,
+                           &ACCUMULATED_COSTS(x,y,0), nx, ny, disp_range);
+        }
+
+    }
+
+    // const int WIDTH = nx;
+    // const int HEIGHT = ny;
+
+    //   for ( int i = 0; i < WIDTH; i++ ) {
+    //       for ( int j = HEIGHT-1; j >= 0; j-- ) {
+    //           if(j==HEIGHT-1) {
+    //               for ( int d = 0; d < disp_range; d++ ) {
+    //                   ACCUMULATED_COSTS(i,HEIGHT-1,d) += COSTS(i,HEIGHT-1,d);
+    //               }
+    //           }
+    //           else {
+    //               evaluate_path( &ACCUMULATED_COSTS(i,j-diry,0),
+    //                        &COSTS(i,j,0),
+    //                        abs(LEFT_IMAGE(i,j)-LEFT_IMAGE(i,j-diry)),
+    //                        &ACCUMULATED_COSTS(i,j,0) , nx, ny, disp_range);
+    //          }
+    //      }
+    //   }
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 __device__ void d_evaluate_path ( int *prior, int *local,
@@ -446,7 +487,13 @@ void d_iterate_direction ( dim3 block, dim3 grid, int* d_costs,
       // BOTTOM MOST EDGE
       // Process every pixel along this edge only if dirx ==
       // 0. Otherwise skip the bottom left and bottom right pixel
-      iterate_direction_diryneg(diry,left_image,costs,accumulated_costs, nx, ny, disp_range);
+      // iterate_direction_diryneg(diry,left_image,costs,accumulated_costs,
+      // nx, ny, disp_range);
+      cudaMemcpy(d_accumulated_costs, accumulated_costs, nx*ny*disp_range*sizeof(int), cudaMemcpyHostToDevice);
+      d_iterate_direction_diryneg <<< grid, block >>> ( dirx, d_left_image,
+                                                      d_costs, d_accumulated_costs,
+                                                      nx, ny, disp_range );
+      cudaMemcpy(accumulated_costs, d_accumulated_costs, nx*ny*disp_range*sizeof(int), cudaMemcpyDeviceToHost);
     }
 }
 
