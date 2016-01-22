@@ -278,15 +278,17 @@ __device__ void d_evaluate_path ( int *prior, int *local,
 
   tmp[d] = prior[d];
   __syncthreads();
-  for (int dim = (disp_range >>= 1); dim > 0; dim >>= 1)
+  int dim = disp_range;
+  do
     {
+      dim = ceil((float)dim /2);
       if (d < dim)
         {
-          if (tmp[d + dim] < tmp[d])
-            tmp[d] = tmp[d + dim];
+          if (prior[d + dim] < tmp[d])
+            tmp[d] = prior[d + dim];
         }
       __syncthreads();
-    }
+    } while (dim > 1);
 
   curr_cost[d] -= tmp[0];
   __syncthreads();

@@ -277,20 +277,20 @@ __device__ void d_evaluate_path ( int *prior, int *local,
   __syncthreads();
   curr_cost[d] += e_smooth;
 
-  //int min = INT_MAX;
-
   tmp[d] = prior[d];
   __syncthreads();
-  for (int dim = (disp_range >>= 1); dim > 0; dim >>= 1)
+  int dim = disp_range;
+  do
     {
+      dim = ceil((float)dim /2);
       if (d < dim)
         {
           if (prior[d + dim] < tmp[d])
             tmp[d] = prior[d + dim];
         }
       __syncthreads();
-    }
-  
+    } while (dim > 1);
+
   curr_cost[d] -= tmp[0];
   __syncthreads();
 }
@@ -328,10 +328,14 @@ __device__ int d_find_min_index ( const int *v, const int disp_range )
   int* idx = shr + (threadIdx.x * disp_range); //indexes array
   int d = threadIdx.z;
   idx[d] = d;
-  idx[d+(disp_range / 2)] = d+(disp_range / 2);
+  int dim = ceil((float)disp_range/2);
+  idx[d + dim] = d + dim;
   __syncthreads();
-  for (int dim = (disp_range / 2); dim > 0; dim >>= 1)
+
+  dim =  disp_range;
+  do
     {
+      dim = ceil((float)dim/2);
       if (d < dim)
         {
           if (v[ idx[d + dim] ] < v[idx[d]] )
@@ -340,7 +344,8 @@ __device__ int d_find_min_index ( const int *v, const int disp_range )
             idx[d] = idx[d + dim];
         }
       __syncthreads();
-    }
+
+    } while (dim > 1);
 
   minind = (v[idx[0]] < INT_MAX) ? idx[0] : minind;
 
@@ -732,7 +737,7 @@ void sgmDevice ( const int *h_leftIm, const int *h_rightIm,
   /* geometry for create_disparity_view*/
   dim3 block2d(2);
   dim3 grid1d_cdv(1);
-  block2d.z = disp_range / 2;
+  block2d.z = ceil((float)disp_range/ 2);
   block2d.x = 7; //with a 64pixel disp_range the ammount of shared memory
                  //needed is 64 * 8 * 32 = 16k bytes
   grid1d_cdv.x = ceil((float) image_dim/block2d.x);
