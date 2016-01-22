@@ -1,0 +1,240 @@
+p =16, image = bull: 
+Host processing time: 1464.936523 (ms)
+Device processing time: 1417.195435 (ms)
+Speed Up: 1.033687 (ms)
+images are identical
+p =16, image = bull: 
+Host processing time: 1443.029419 (ms)
+Device processing time: 1434.810059 (ms)
+Speed Up: 1.005728 (ms)
+images are identical
+p =16, image = bull: 
+Host processing time: 1485.966431 (ms)
+Device processing time: 1469.974121 (ms)
+Speed Up: 1.010879 (ms)
+images are identical
+p =16, image = cones: 
+Host processing time: 1512.819580 (ms)
+Device processing time: 1465.960571 (ms)
+Speed Up: 1.031965 (ms)
+images are identical
+p =16, image = cones: 
+Host processing time: 1500.510986 (ms)
+Device processing time: 1480.745117 (ms)
+Speed Up: 1.013349 (ms)
+images are identical
+p =16, image = cones: 
+Host processing time: 1525.685059 (ms)
+Device processing time: 1502.146484 (ms)
+Speed Up: 1.015670 (ms)
+images are identical
+p =16, image = teddy: 
+Host processing time: 3304.538330 (ms)
+Device processing time: 1934.380005 (ms)
+Speed Up: 1.708319 (ms)
+images are identical
+p =16, image = teddy: 
+Host processing time: 2267.228027 (ms)
+Device processing time: 1470.858032 (ms)
+Speed Up: 1.541432 (ms)
+images are identical
+p =16, image = teddy: 
+Host processing time: 1460.162231 (ms)
+Device processing time: 1443.212646 (ms)
+Speed Up: 1.011744 (ms)
+images are identical
+p =16, image = venus: 
+Host processing time: 1482.374512 (ms)
+Device processing time: 1459.731201 (ms)
+Speed Up: 1.015512 (ms)
+images are identical
+p =16, image = venus: 
+Host processing time: 1445.095947 (ms)
+Device processing time: 1402.119385 (ms)
+Speed Up: 1.030651 (ms)
+images are identical
+p =16, image = venus: 
+Host processing time: 1534.975464 (ms)
+Device processing time: 1492.704712 (ms)
+Speed Up: 1.028318 (ms)
+images are identical
+p =32, image = bull: 
+Host processing time: 5274.332520 (ms)
+Device processing time: 5076.250977 (ms)
+Speed Up: 1.039021 (ms)
+images are identical
+p =32, image = bull: 
+Host processing time: 5079.893555 (ms)
+Device processing time: 5027.971680 (ms)
+Speed Up: 1.010327 (ms)
+images are identical
+p =32, image = bull: 
+Host processing time: 5077.854980 (ms)
+Device processing time: 5029.709473 (ms)
+Speed Up: 1.009572 (ms)
+images are identical
+p =32, image = cones: 
+Host processing time: 5335.610352 (ms)
+Device processing time: 5242.710449 (ms)
+Speed Up: 1.017720 (ms)
+images are identical
+p =32, image = cones: 
+Host processing time: 5133.324707 (ms)
+Device processing time: 5073.110352 (ms)
+Speed Up: 1.011869 (ms)
+images are identical
+p =32, image = cones: 
+Host processing time: 5174.556152 (ms)
+Device processing time: 5075.273438 (ms)
+Speed Up: 1.019562 (ms)
+images are identical
+p =32, image = teddy: 
+Host processing time: 5223.566895 (ms)
+Device processing time: 5136.681152 (ms)
+Speed Up: 1.016915 (ms)
+images are identical
+p =32, image = teddy: 
+Host processing time: 5247.718750 (ms)
+Device processing time: 5135.619629 (ms)
+Speed Up: 1.021828 (ms)
+images are identical
+p =32, image = teddy: 
+Host processing time: 5230.104492 (ms)
+Device processing time: 5134.818359 (ms)
+Speed Up: 1.018557 (ms)
+images are identical
+p =32, image = venus: 
+Host processing time: 5064.753418 (ms)
+Device processing time: 4992.253906 (ms)
+Speed Up: 1.014522 (ms)
+images are identical
+p =32, image = venus: 
+Host processing time: 5088.938477 (ms)
+Device processing time: 4994.284180 (ms)
+Speed Up: 1.018952 (ms)
+images are identical
+p =32, image = venus: 
+Host processing time: 5039.642578 (ms)
+Device processing time: 5029.844238 (ms)
+Speed Up: 1.001948 (ms)
+images are identical
+p =48, image = bull: 
+Host processing time: 11003.093750 (ms)
+Device processing time: 10914.553711 (ms)
+Speed Up: 1.008112 (ms)
+images are identical
+p =48, image = bull: 
+Host processing time: 11045.484375 (ms)
+Device processing time: 10912.187500 (ms)
+Speed Up: 1.012215 (ms)
+images are identical
+p =48, image = bull: 
+Host processing time: 11016.737305 (ms)
+Device processing time: 10931.988281 (ms)
+Speed Up: 1.007752 (ms)
+images are identical
+p =48, image = cones: 
+Host processing time: 11027.421875 (ms)
+Device processing time: 10952.159180 (ms)
+Speed Up: 1.006872 (ms)
+images are identical
+p =48, image = cones: 
+Host processing time: 11025.180664 (ms)
+Device processing time: 11005.775391 (ms)
+Speed Up: 1.001763 (ms)
+images are identical
+p =48, image = cones: 
+Host processing time: 11755.079102 (ms)
+Device processing time: 11601.629883 (ms)
+Speed Up: 1.013227 (ms)
+images are identical
+p =48, image = teddy: 
+Host processing time: 11348.712891 (ms)
+Device processing time: 11121.251953 (ms)
+Speed Up: 1.020453 (ms)
+images are identical
+p =48, image = teddy: 
+Host processing time: 11175.552734 (ms)
+Device processing time: 11254.458008 (ms)
+Speed Up: 0.992989 (ms)
+images are identical
+p =48, image = teddy: 
+Host processing time: 11196.704102 (ms)
+Device processing time: 11130.711914 (ms)
+Speed Up: 1.005929 (ms)
+images are identical
+p =48, image = venus: 
+Host processing time: 10928.351562 (ms)
+Device processing time: 10815.908203 (ms)
+Speed Up: 1.010396 (ms)
+images are identical
+p =48, image = venus: 
+Host processing time: 11000.003906 (ms)
+Device processing time: 10818.630859 (ms)
+Speed Up: 1.016765 (ms)
+images are identical
+p =48, image = venus: 
+Host processing time: 11296.425781 (ms)
+Device processing time: 11485.739258 (ms)
+Speed Up: 0.983518 (ms)
+images are identical
+p =64, image = bull: 
+Host processing time: 20488.097656 (ms)
+Device processing time: 20024.792969 (ms)
+Speed Up: 1.023136 (ms)
+images are identical
+p =64, image = bull: 
+Host processing time: 19641.917969 (ms)
+Device processing time: 19564.251953 (ms)
+Speed Up: 1.003970 (ms)
+images are identical
+p =64, image = bull: 
+Host processing time: 19956.894531 (ms)
+Device processing time: 19669.607422 (ms)
+Speed Up: 1.014606 (ms)
+images are identical
+p =64, image = cones: 
+Host processing time: 19701.943359 (ms)
+Device processing time: 19549.300781 (ms)
+Speed Up: 1.007808 (ms)
+images are identical
+p =64, image = cones: 
+Host processing time: 20536.261719 (ms)
+Device processing time: 19916.552734 (ms)
+Speed Up: 1.031115 (ms)
+images are identical
+p =64, image = cones: 
+Host processing time: 19647.152344 (ms)
+Device processing time: 19501.650391 (ms)
+Speed Up: 1.007461 (ms)
+images are identical
+p =64, image = teddy: 
+Host processing time: 19895.365234 (ms)
+Device processing time: 20544.003906 (ms)
+Speed Up: 0.968427 (ms)
+images are identical
+p =64, image = teddy: 
+Host processing time: 19912.505859 (ms)
+Device processing time: 19827.343750 (ms)
+Speed Up: 1.004295 (ms)
+images are identical
+p =64, image = teddy: 
+Host processing time: 20152.470703 (ms)
+Device processing time: 20035.126953 (ms)
+Speed Up: 1.005857 (ms)
+images are identical
+p =64, image = venus: 
+Host processing time: 19411.312500 (ms)
+Device processing time: 19301.240234 (ms)
+Speed Up: 1.005703 (ms)
+images are identical
+p =64, image = venus: 
+Host processing time: 20112.912109 (ms)
+Device processing time: 19759.587891 (ms)
+Speed Up: 1.017881 (ms)
+images are identical
+p =64, image = venus: 
+Host processing time: 19434.578125 (ms)
+Device processing time: 19632.451172 (ms)
+Speed Up: 0.989921 (ms)
+images are identical

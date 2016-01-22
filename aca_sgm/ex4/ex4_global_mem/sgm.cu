@@ -202,7 +202,6 @@ __device__ void d_evaluate_path ( int *prior, int *local,
                                   int path_intensity_gradient, int *curr_cost,
                                   int nx, int ny, int disp_range )
 {
-  //memcpy(curr_cost, local, sizeof(int)*disp_range);
   int d = threadIdx.z;
   curr_cost[d] = local[threadIdx.z];
   __syncthreads();
@@ -700,7 +699,7 @@ void sgmDevice ( const int *h_leftIm, const int *h_rightIm,
       grid1d.x = ceil((float) image_dim/512);
     }
   else
-    {                            //not likely to happen
+    {
       block1d.x = image_dim;
       grid1d.x = 1;
     }
@@ -858,7 +857,7 @@ main ( int argc, char** argv )
     printf( "Host processing time: %f (ms)\n", timeH);
     cudaEventElapsedTime( &timeD, startD, stopD );
     printf( "Device processing time: %f (ms)\n", timeD);
-
+    printf( "SpeedUp: %f (ms)\n", timeH/timeD);
     // save output images
     if (cutSavePGMi(referenceOut, (unsigned int *)reference, w, h) != CUTTrue) {
         printf("Failed to save image file: %s\n", referenceOut);

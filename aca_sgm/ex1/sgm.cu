@@ -589,7 +589,8 @@ int main( int argc, char** argv)
     printf( "Host processing time: %f (ms)\n", timeH);
     cudaEventElapsedTime( &timeD, startD, stopD );
     printf( "Device processing time: %f (ms)\n", timeD);
-
+    printf( "Speed Up: %f (ms)\n", timeH/timeD);
+    
     // save output images
     if (cutSavePGMi(referenceOut, (unsigned int *)reference, w, h) != CUTTrue) {
         printf("Failed to save image file: %s\n", referenceOut);

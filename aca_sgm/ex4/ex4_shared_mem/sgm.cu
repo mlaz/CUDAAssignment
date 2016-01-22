@@ -63,12 +63,6 @@ void iterate_direction( const int dirx, const int diry, const int *left_image,
                         const int* costs, int *accumulated_costs,
                         const int nx, const int ny, const int disp_range ) ;
 
-// void d_iterate_direction ( dim3 block, dim3 grid, const int* d_costs,
-//                            const int *d_left_image, int *d_accumulated_costs,
-//                            const int dirx, const int diry, const int *left_image,
-//                            const int* costs, int *accumulated_costs,
-//                            const int nx, const int ny, const int disp_range );
-
 void inplace_sum_views( int * im1, const int * im2,
                         const int nx, const int ny, const int disp_range ) ;
 
@@ -89,7 +83,7 @@ __device__ int d_find_min_index ( const int *v, const int disp_range);
 
 __device__ void d_evaluate_path ( int *prior, int *local,
                                 int path_intensity_gradient, int *curr_cost,
-                                  int nx, int ny, int disp_range );
+                                  int nx, int ny, int disp_range, int *tmp);
 
 __global__ void d_determine_costs ( int *left_image, int *right_image, int *costs,
                                   int nx, int ny, int disp_range )
@@ -112,6 +106,11 @@ __global__ void d_iterate_direction ( int* costs,
                                       const int nx, const int ny, const int disp_range )
 {
   extern __shared__ int shr[];
+  int* sh_current = shr;
+  int* sh_prior = sh_current + disp_range;
+  int* sh_tmp = sh_prior + disp_range;
+  int* aux;
+
   // Walk along the edges in a clockwise fashion
   if ( dirx > 0 ) {
     // LEFT MOST EDGE
@@ -120,9 +119,6 @@ __global__ void d_iterate_direction ( int* costs,
     int y = blockIdx.y;
     int d = threadIdx.z;
 
-    int* sh_current = shr;
-    int* sh_prior = sh_current + disp_range;
-    int* aux;
     if ( (y < ny) && (d < disp_range) )
       {
         /* copying the first vector to shared memory */
@@ -142,12 +138,7 @@ __global__ void d_iterate_direction ( int* costs,
             d_evaluate_path( sh_prior,
                              &COSTS(x,y,0),
                              abs(LEFT_IMAGE(x,y)-LEFT_IMAGE(x-dirx,y)) ,
-                             sh_current, nx, ny, disp_range);
-            // d_evaluate_path( &ACCUMULATED_COSTS(x-dirx,y,0),
-            //                  &COSTS(x,y,0),
-            //                  abs(LEFT_IMAGE(x,y)-LEFT_IMAGE(x-dirx,y)) ,
-            //                  &ACCUMULATED_COSTS(x,y,0), nx, ny, disp_range);
-            /* copying the last processed pixel to global memory */
+                             sh_current, nx, ny, disp_range, sh_tmp);
             ACCUMULATED_COSTS(x,y,d) = sh_current[d];
             __syncthreads();
           }
@@ -162,10 +153,6 @@ __global__ void d_iterate_direction ( int* costs,
     int x = blockIdx.y;
     int y = 0;
     int d = threadIdx.z;
-
-    int* sh_current = shr;
-    int* sh_prior = sh_current + disp_range;
-    int* aux;
 
     if ( (x < nx) && (d < disp_range) )
       {
@@ -186,12 +173,7 @@ __global__ void d_iterate_direction ( int* costs,
             d_evaluate_path( sh_prior,
                              &COSTS(x,y,0),
                              abs(LEFT_IMAGE(x,y)-LEFT_IMAGE(x,y-diry)) ,
-                             sh_current, nx, ny, disp_range);
-            // d_evaluate_path( &ACCUMULATED_COSTS(x,y-diry,0),
-            //                  &COSTS(x,y,0),
-            //                  abs(LEFT_IMAGE(x,y)-LEFT_IMAGE(x,y-diry)) ,
-            //                  &ACCUMULATED_COSTS(x,y,0), nx, ny, disp_range);
-            /* copying the last processed pixel to global memory */
+                             sh_current, nx, ny, disp_range, sh_tmp);
             ACCUMULATED_COSTS(x,y,d) = sh_current[d];
             __syncthreads();
           }
@@ -205,10 +187,6 @@ __global__ void d_iterate_direction ( int* costs,
     int x = nx-1;
     int y = blockIdx.y;
     int d = threadIdx.z;
-
-    int* sh_current = shr;
-    int* sh_prior = sh_current + disp_range;
-    int* aux;
 
     if ( (y < ny) && (d < disp_range) )
       {
@@ -229,12 +207,7 @@ __global__ void d_iterate_direction ( int* costs,
             d_evaluate_path( sh_prior,
                              &COSTS(x,y,0),
                              abs(LEFT_IMAGE(x,y)-LEFT_IMAGE(x-dirx,y)) ,
-                             sh_current, nx, ny, disp_range);
-            // d_evaluate_path( &ACCUMULATED_COSTS(x-dirx,y,0),
-            //                  &COSTS(x,y,0),
-            //                  abs(LEFT_IMAGE(x,y)-LEFT_IMAGE(x-dirx,y)) ,
-            //                  &ACCUMULATED_COSTS(x,y,0), nx, ny, disp_range);
-            /* copying the last processed pixel to global memory */
+                             sh_current, nx, ny, disp_range, sh_tmp);
             ACCUMULATED_COSTS(x,y,d) = sh_current[d];
             __syncthreads();
           }
@@ -248,10 +221,6 @@ __global__ void d_iterate_direction ( int* costs,
     int x = blockIdx.y;
     int y = ny-1;
     int d = threadIdx.z;
-
-    int* sh_current = shr;
-    int* sh_prior = sh_current + disp_range;
-    int* aux;
 
     if ( (x < nx) && (d < disp_range) )
       {
@@ -273,12 +242,7 @@ __global__ void d_iterate_direction ( int* costs,
             d_evaluate_path( sh_prior,
                              &COSTS(x,y,0),
                              abs(LEFT_IMAGE(x,y)-LEFT_IMAGE(x,y-diry)) ,
-                             sh_current, nx, ny, disp_range);
-            // d_evaluate_path( &ACCUMULATED_COSTS(x,y-diry,0),
-            //                  &COSTS(x,y,0),
-            //                  abs(LEFT_IMAGE(x,y)-LEFT_IMAGE(x,y-diry)) ,
-            //                  &ACCUMULATED_COSTS(x,y,0), nx, ny, disp_range);
-            /* copying the last processed pixel to global memory */
+                             sh_current, nx, ny, disp_range, sh_tmp);
             ACCUMULATED_COSTS(x,y,d) = sh_current[d];
             __syncthreads();
           }
@@ -288,7 +252,7 @@ __global__ void d_iterate_direction ( int* costs,
 
 __device__ void d_evaluate_path ( int *prior, int *local,
                                   int path_intensity_gradient, int *curr_cost,
-                                  int nx, int ny, int disp_range )
+                                  int nx, int ny, int disp_range, int *tmp )
 {
   int d = threadIdx.z;
   curr_cost[d] = local[d];
@@ -313,26 +277,21 @@ __device__ void d_evaluate_path ( int *prior, int *local,
   __syncthreads();
   curr_cost[d] += e_smooth;
 
-  int min = INT_MAX;
-  int* tmp = prior + disp_range;
+  //int min = INT_MAX;
+
   tmp[d] = prior[d];
   __syncthreads();
-  for (int dim = (disp_range / 2); dim > 0; dim >>= 1)
+  for (int dim = (disp_range >>= 1); dim > 0; dim >>= 1)
     {
       if (d < dim)
         {
-          if (tmp[d + dim] < tmp[d])
-            tmp[d] = tmp[d + dim];
+          if (prior[d + dim] < tmp[d])
+            tmp[d] = prior[d + dim];
         }
       __syncthreads();
     }
-
-  min = (tmp[0] < INT_MAX) ? tmp[0] : min;
-
-  // for ( int d1 = 0; d1 < disp_range; d1++ )
-  //   min = MMIN(min, prior[d1]);
-
-  curr_cost[d] -= min;
+  
+  curr_cost[d] -= tmp[0];
   __syncthreads();
 }
 
@@ -348,16 +307,11 @@ __global__ void d_inplace_sum_views ( int * im1, const int * im2,
 __global__ void d_create_disparity_view ( int *accumulated_costs , int * disp_image,
                                         int nx, int ny, int disp_range )
 {
-  // extern __shared__ int shr[];
-  // int* v = shr;
-
   int pos = ((blockIdx.x * blockDim.x) + threadIdx.x); //position in image
   int size = nx * ny;
   int d = threadIdx.z;
   int idx;
-  // if ( pos < size )
-  //   disp_image[pos] = 4 * d_find_min_index(&accumulated_costs[pos *
-  //   disp_range], disp_range);
+
   if ( pos < size && d < disp_range )
     {
       idx = d_find_min_index(&accumulated_costs[pos * (disp_range)], disp_range);
@@ -369,17 +323,6 @@ __global__ void d_create_disparity_view ( int *accumulated_costs , int * disp_im
 
 __device__ int d_find_min_index ( const int *v, const int disp_range )
 {
-  // int min = INT_MAX;
-  // int minind = -1;
-  // for (int d=0; d < disp_range; d++) {
-  //   if(v[d]<min) {
-  //     min = v[d];
-  //     minind = d;
-  //   }
-  // }
-  // return minind;
-
-
   extern __shared__ int shr[];
   int minind = -1;
   int* idx = shr + (threadIdx.x * disp_range); //indexes array
@@ -945,6 +888,7 @@ main ( int argc, char** argv )
     printf( "Host processing time: %f (ms)\n", timeH);
     cudaEventElapsedTime( &timeD, startD, stopD );
     printf( "Device processing time: %f (ms)\n", timeD);
+    printf( "SpeedUp: %f (ms)\n", timeH/timeD);
 
     // save output images
     if (cutSavePGMi(referenceOut, (unsigned int *)reference, w, h) != CUTTrue) {
